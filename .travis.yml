@@ -10,3 +10,4 @@ script:
 - wget http://www.cs.cmu.edu/\~alavie/METEOR/download/meteor-1.5.tar.gz
 - tar xvzf meteor-1.5.tar.gz
 - pytest
+- teapot --src example/src.fr --adv-src example/adv.charswap.fr --out example/base.en --adv-out example/adv.charswap.en --ref example/ref.en

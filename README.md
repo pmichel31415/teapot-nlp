@@ -14,7 +14,7 @@ An attack is declared **successful** on `x,y` when `s_src(x, x')+d_tgt(y(x),y(x'
 
 With TEAPOT, you can compute `s_src`, `d_tgt` and the success rate of an attack easily using proxy metrics for the source and target similarity (`chrF` by default).
 
-## Usage
+## Basic Usage
 
 Given the original input `example/src.fr`, adversarial input `example/adv.charswap.fr`, reference output `example/ref.en`, original output (output of the model on the original input) `example/base.en` and adversarial output (output of the model on the adversarial input) `example/adv.charswap.en`, running:
 
@@ -48,6 +48,8 @@ Alternatively you can specify only `--src` and `--adv-src` (for source side eval
 You can learn more about the command line options by running `teapot -h`. Notably you can specify which score to use with `--score {bleu,meteor,chrf}` (refer to the command line help for the list of scores implemented in your version).
 
 ## Advanced usage
+
+### Custom scorers
 
 TEAPOT comes with predefined scores to compute the source and target side similarity. However, in some cases you might want to define you own score. Fortunately this can be done in a few steps if you are familiar with python:
 
@@ -84,3 +86,38 @@ teapot \
     --value 0.3
 ```
 
+### Programmatic Usage
+
+Here is an example of how to use TEAPOT in your own code:
+
+```python
+import teapot
+# Instantiate the scorer of your choice
+chrf_scorer = teapot.ChrF()
+bleu_scorer = teapot.BLEU()
+meteor_scorer = teapot.METEOR("path/to/meteor.jar", java_command="java -Xmx2G -jar")
+# Compute s_src for example
+# This will return a list of chrf scores
+s_src = chrf_scorer.score(adv_inputs, original_inputs)
+# Compute d_tgt
+# This will return a list of relative difference in scores (clamped to positive values)
+d_tgt = chrf_scorer.rd_score(adv_outputs, original_outputs, reference_outputs)
+```
+
+## License
+
+The code is released under the [MIT License](LICENSE)
+
+
+## Citing
+
+If you use this software in your own research, consider citing the following paper:
+
+```
+@InProceedings{michel2019onevaluation,
+  author    = {Michel, Paul  and  Neubig, Graham and Li, Xian and Pino, Juan Miguel},
+  title     = {On Evaluation of Adversarial Perturbations for Sequence-to-Sequence Models},
+  year      = {2019},
+  booktitle = {Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (NAACL-HLT)}
+}
+```
