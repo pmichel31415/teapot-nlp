@@ -8,9 +8,9 @@ However, these perturbations only indicate weaknesses in the model if they do no
 TEAPOT is an implementation of the evaluation framework described in the NAACL 2019 paper [On Evaluation of Adversarial Perturbations for Sequence-to-Sequence Models](link_to_paper) (**FIXME**: add link), wherein an adversarial attack is evaluated using two quantities:
 
 - `s_src(x, x')`: a measure of the semantic similarity between the original input `x` and its adversarial perturbation `x'`.
-- `d_tgt(y(x),y(x'),y*)`: a measure of how much the output similarity `s_tgt` (w.r.t. the reference `y*`) decreases when the model is ran on the adversarial input (giving output `y(x')`) instead of the original input (giving `y(x)`). Specifically `d_tgt(y(x),y(x'),y*)` is defined as `0` if `s_tgt(y,y*)<s_tgt(y',y*)` and `(s_tgt(y,y*)-s_tgt(y',y*))/s_tgt(y,y*)` otherwise.
+- `d_tgt(y(x),y(x'),y*)`: a measure of how much the output similarity `s_tgt` (w.r.t. the reference `y*`) decreases when the model is ran on the adversarial input (giving output `y(x')`) instead of the original input (giving `y(x)`). Specifically `d_tgt(y(x),y(x'),y*)` is defined as `0` if `s_tgt(y,y*) < s_tgt(y',y*)` and `(s_tgt(y,y*) - s_tgt(y',y*)) / s_tgt(y,y*)` otherwise.
 
-An attack is declared **successful** on `x,y` when `s_src(x, x')+d_tgt(y(x),y(x'),y*)>1`, in other words, *an adversarial attack changing `x` to `x'` is successful if it destroys the target more than it destroys the source*.
+An attack is declared **successful** on `x,y` when `s_src(x,x') + d_tgt(y(x),y(x'),y*) > 1`, in other words, *an adversarial attack changing `x` to `x'` is successful if it destroys the target more than it destroys the source*.
 
 With TEAPOT, you can compute `s_src`, `d_tgt` and the success rate of an attack easily using proxy metrics for the source and target similarity (`chrF` by default).
 
@@ -68,7 +68,7 @@ teapot \
   --success-threshold 1.8
 ```
 
-Notice that we specified `--success-threshold 1.8`, which means that an attack will be considered successful only when `s_src(x, x')+d_tgt(y(x),y(x'),y*)>1.8`. While using `1` as a threshold makes sense when `s_src` and `s_tgt` are the same, when `s_tgt` is the zero-one loss this is a poor choice, as any attack that flips the label will be successful regardless of `s_src`. By upping the threshold to `1.8` we enforce that `s_src` (here chrF) should be at least `0.8` for an attack to be successful.
+Notice that we specified `--success-threshold 1.8`, which means that an attack will be considered successful only when `s_src(x,x') + d_tgt(y(x),y(x'),y*) > 1.8`. While using `1` as a threshold makes sense when `s_src` and `s_tgt` are the same, when `s_tgt` is the zero-one loss this is a poor choice, as any attack that flips the label will be successful regardless of `s_src`. By upping the threshold to `1.8` we enforce that `s_src` (here chrF) should be at least `0.8` for an attack to be successful.
 
 ## Advanced usage
 
@@ -79,8 +79,8 @@ TEAPOT comes with predefined scores to compute the source and target side simila
 1. Write your own `teapot.Scorer` subclass in a python source file (there are examples in [examples/custom_scorers.py]). This is the hard part.
 2. Call teapot with the arguments `--custom-scores-source path/to/your/scorer.py` and `--score [score_key]` where `[score_key]` is the shorthand you have defined for your scorer with `teapot.register_scorer` (again, see the examples in [examples/custom_scorers.py] for a walkthrough)
 3. If your scorer works fine, and it doesn't rely on heavy dependencies, consider contributing it to TEAPOT by
-  1. Adding the class to [teapot/scorers.py]
-  2. Adding a simple unit test to [tests/test_scorers.py]
+    1. Adding the class to teapot/scorers.py]
+    2. Adding a simple unit test to [tests/test_scorers.py]
 
 Here is an example where `s_tgt` is the `f1` score defined in [examples/custom_scorers.py]:
 
