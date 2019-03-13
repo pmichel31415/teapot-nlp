@@ -10,5 +10,12 @@ script:
 - tar xvzf meteor-1.5.tar.gz
 - pytest
 - teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en
-- teapot --src examples/sentiment/src.txt --adv-src examples/sentiment/adv_src.txt --out examples/sentiment/out.txt --adv-out examples/sentiment/adv_out.txt --ref examples/sentiment/ref.txt --s-tgt zero_one --success-threshold 1.8
-- teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en --custom-scores-source examples/custom_scorers.py --s-tgt f1
+- teapot --src examples/sentiment/src.txt --adv-src examples/sentiment/adv_src.txt --out examples/sentiment/out.txt --adv-out examples/sentiment/adv_out.txt --ref
+  examples/sentiment/ref.txt --s-tgt zero_one --success-threshold 1.8
+- teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en --custom-scores-source
+  examples/custom_scorers.py --s-tgt f1
+deploy:
+  provider: pypi
+  user: pmichel31415
+  password:
+    secure: gg8jqJi+uHitAu64zVAthiIHQ4ln9E2QJpkptMsGkaHRBFEFglfTzokpVseN/dYacd57Eq5IUHEzAJCSfWWm5XtaYnaLEQRBY9csX9/0TW+3mpKmZPaQkaSIiggPrIuqiJJdx+mIHP6WatbvQJvJqw/6m4MBInPqTDFPKDyoTefDsXZ0FRLcQoPjpu5YwfMHdPDN0ZN+DoB3YifaUHQjQgUDyGrZFiNpTErQxBpS7kyarXRRQ76NngXt7lqaq0BjgbwswlLaWCi2j8xoYGCAjH9fHl6XIDm4Hjse474o41BVQZnL758x9m0GzB2h0gXaAflNx84zkYZtQh1DxhQP1C2ABSJsuNUhWcPAORXBlFVKlGc6WUseearihqldNzW7M+eZ0TgCyRII9pq5m++gXP2NeASIAEYpJg/LGchbk84nigwPGmqH2sb40DXYq+enlNfSj6U45vbSM6hMlqBPHvbKxmYn3Mi364Ty5coiHYfqe0Id4sxvWtivgEDrfK9+hPKg0Bis9InJyokE0M0HR7MC4dq/ffFSegW7y8xLOepY2axVNmqsznka7cQQK09kEFcRj6KMT5EwXSvuII6IWh+vHZgsz0m629Myaxqc9rI3Tbia/0fN8GdtnO6pkSQsEabp1GGhndrsAQw+Nkz955Y6+NYw7jomae9tsXD0JoE=
