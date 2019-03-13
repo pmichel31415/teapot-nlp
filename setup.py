@@ -32,7 +32,7 @@ def find_version():
 
 
 setup(
-    name="teapot",
+    name="teapot-nlp",
     version=find_version(),
     description="Source and target side evaluation of adversarial attacks on "
     "NLP models",
