@@ -1,4 +1,4 @@
-<img align="left" height="50" src="teapot.gif" alt="teapot"/>
+<img align="left" height="64" src="teapot.gif" alt="teapot"/>
 
 # TEAPOT
 
