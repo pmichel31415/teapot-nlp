@@ -9,14 +9,18 @@ from teapot import utils
 scorers = {}
 
 
-def register_scorer(key, name):
+def register_scorer(keys, name):
 
     def register_func(cls):
         if not issubclass(cls, Scorer):
             raise ValueError(f"{cls.__name__} should be a subclass of Scorer")
-        if key in scorers:
-            raise ValueError(f"Scorer {key} already exists")
-        scorers[key] = cls
+        keys_list = keys
+        if isinstance(keys_list, str):
+            keys_list = [keys_list]
+        for key in keys_list:
+            if key in scorers:
+                raise ValueError(f"Scorer {key} already exists")
+            scorers[key] = cls
         cls._name = name
         return cls
 
@@ -70,6 +74,13 @@ class Scorer(object):
     @classmethod
     def from_args(cls, args):
         return cls()
+
+
+@register_scorer(["zero_one", "exact_match"], "accuracy")
+class ZeroOne(Scorer):
+
+    def score_sentence(self, hyp, ref, lang=None):
+        return float(hyp == ref)
 
 
 @register_scorer("bleu", "BLEU")
@@ -176,5 +187,8 @@ def get_scorer_class(key):
     return scorers[key]
 
 
-def scorer_from_args(args):
-    return get_scorer_class(args.score).from_args(args)
+def scorers_from_args(args):
+    return (
+        get_scorer_class(args.s_src).from_args(args),
+        get_scorer_class(args.s_tgt).from_args(args),
+    )

@@ -7,10 +7,17 @@ from teapot import utils
 def get_args():
     parser = argparse.ArgumentParser("")
     parser.add_argument(
-        "--score",
+        "--s-src",
         default="chrf",
         type=str,
-        help="Score to evaluate semantic similarity "
+        help="Score to evaluate similarity in the source."
+        f"(choose from: {', '.join(list(scorers.scorers.keys()))})",
+    )
+    parser.add_argument(
+        "--s-tgt",
+        default="chrf",
+        type=str,
+        help="Score to evaluate similarity in the target."
         f"(choose from: {', '.join(list(scorers.scorers.keys()))})",
     )
     parser.add_argument(
@@ -66,6 +73,15 @@ def get_args():
         help="Scale for the scores.",
     )
     parser.add_argument(
+        "--success-threshold",
+        default=1.0,
+        type=float,
+        help="Threshold that the value of s_src + d_tgt must surpass to "
+        "consider the attack successful. When s_src and s_tgt are the same "
+        "this should be 1, however in other cases a higher value might be "
+        "preferable (eg. when s_tgt is more 'optimistic' than s_src)",
+    )
+    parser.add_argument(
         "--terse",
         action="store_true",
         help="Only output average scores, one on each line "
@@ -110,9 +126,11 @@ def get_args():
             )
         scorers.read_custom_scorers_source(path)
     # Add scorer specific args
-    scorer_class = scorers.get_scorer_class(args.score)
+    scorer_src_class = scorers.get_scorer_class(args.s_src)
+    scorer_src_class.add_args(parser)
+    scorer_tgt_class = scorers.get_scorer_class(args.s_tgt)
+    scorer_tgt_class.add_args(parser)
     # Parse again with scorer specific args
-    scorer_class.add_args(parser)
     args = parser.parse_args()
     return args, source_side, target_side
 
@@ -122,12 +140,12 @@ def main():
     args, source_side, target_side = get_args()
     scale = args.scale
     # Scorer
-    scorer = scorers.scorer_from_args(args)
+    scorer_src, scorer_tgt = scorers.scorers_from_args(args)
     # Source side eval
     N = None
     if source_side:
         # Source score (s_src in the paper)
-        s_src = scorer.score(
+        s_src = scorer_src.score(
             utils.loadtxt(args.adv_src),
             utils.loadtxt(args.src),
             lang=args.src_lang,
@@ -139,7 +157,7 @@ def main():
         if args.terse:
             print(f"{s_src_avg*scale:.3f}")
         else:
-            print(f"Source side preservation ({scorer.name}):")
+            print(f"Source side preservation ({scorer_src.name}):")
             print(f"Mean:\t{s_src_avg*scale:.3f}")
             print(f"Std:\t{s_src_std*scale:.3f}")
             print(f"5%-95%:\t{s_src_5*scale:.3f}-{s_src_95*scale:.3f}")
@@ -147,7 +165,7 @@ def main():
     # Target side eval
     if target_side:
         # target relative decrease in score (d_tgt in the paper)
-        d_tgt = scorer.rd_score(
+        d_tgt = scorer_tgt.rd_score(
             utils.loadtxt(args.adv_out),
             utils.loadtxt(args.out),
             utils.loadtxt(args.ref),
@@ -171,14 +189,17 @@ def main():
                 print("-" * 80)
             print(
                 "Target side degradation "
-                f"(relative decrease in {scorer.name}):"
+                f"(relative decrease in {scorer_tgt.name}):"
             )
             print(f"Mean:\t{d_tgt_avg*scale:.3f}")
             print(f"Std:\t{d_tgt_std*scale:.3f}")
             print(f"5%-95%:\t{d_tgt_5*scale:.3f}-{d_tgt_95*scale:.3f}")
     # Both sided (success)
     if target_side and source_side:
-        success = [float(s + d > 1) for s, d in zip(s_src, d_tgt)]
+        success = [
+            float(s + d > args.success_threshold)
+            for s, d in zip(s_src, d_tgt)
+        ]
         success_fraction = sum(success) / N
         # Print success
         if args.terse:

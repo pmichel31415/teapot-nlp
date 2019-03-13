@@ -50,7 +50,7 @@ def check_tokenization(sents):
                     file=sys.stderr,
                 )
                 print(
-                    "It looks like you forgot to detokenize your test data, "
+                    "It looks like you forgot to detokenize your data, "
                     "which may hurt your score and make your results "
                     "difficult to replicate.",
                     file=sys.stderr,
