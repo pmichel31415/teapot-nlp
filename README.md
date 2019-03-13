@@ -1,4 +1,8 @@
-<div align="center"><h1>TEAPOT</h1></div>
+<div align="center">
+  <img src="teapot.gif" alt="teapot"/>
+  <h1>TEAPOT</h1>
+  <img src="teapot.gif" alt="teapot"/>
+</div>
 
 TEAPOT (**T**ool for **E**valuating **A**dversarial **P**erturbations **O**n **T**ext) is a toolkit to evaluate the effectiveness of adversarial perturbations on NLP systems by taking into account the preservation of meaning in the source.
 
@@ -144,7 +148,7 @@ d_tgt = chrf_scorer.rd_score(adv_outputs, original_outputs, reference_outputs)
 
 ## License
 
-The code is released under the [MIT License](LICENSE)
+The code is released under the [MIT License](LICENSE). Credits to [@eseniko](https://giphy.com/eseniko) for the image.
 
 
 ## Citing
