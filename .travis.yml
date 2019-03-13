@@ -9,4 +9,6 @@ script:
 - wget http://www.cs.cmu.edu/\~alavie/METEOR/download/meteor-1.5.tar.gz
 - tar xvzf meteor-1.5.tar.gz
 - pytest
-- teapot --src example/src.fr --adv-src example/adv.charswap.fr --out example/base.en --adv-out example/adv.charswap.en --ref example/ref.en
+- teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en
+- teapot --src examples/sentiment/src.txt --adv-src examples/sentiment/adv_src.txt --out examples/sentiment/out.txt --adv-out examples/sentiment/adv_out.txt --ref examples/sentiment/ref.txt --s-tgt zero_one --success-threshold 1.8
+- teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en --custom-scores-source examples/custom_scorers.py --s-tgt f1

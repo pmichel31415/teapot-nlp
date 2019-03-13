@@ -8,6 +8,28 @@ from teapot import scorers  # noqa
 from teapot import utils  # noqa
 
 
+class TestZeroOne(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        self.ref = "1"
+        self.hyp = "0"
+        self.scorer = scorers.scorers["zero_one"]()
+
+    def test_score(self):
+        [score] = self.scorer.score([self.hyp], [self.ref])
+        self.assertAlmostEquals(score, 0)
+        [score] = self.scorer.score([self.hyp], [self.hyp])
+        self.assertAlmostEquals(score, 1)
+
+    def test_alt_name(self):
+        alt_name_scorer = scorers.scorers["exact_match"]()
+        self.assertAlmostEquals(
+            self.scorer.score([self.hyp], [self.ref])[0],
+            alt_name_scorer.score([self.hyp], [self.ref])[0],
+        )
+
+
 class TestBLEU(unittest.TestCase):
 
     @classmethod
