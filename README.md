@@ -7,7 +7,7 @@ TEAPOT (**T**ool for **E**valuating **A**dversarial **P**erturbations **O**n **T
 Adversarial perturbations (perturbations to the input of a model that elicit large changes in the output), have been shown to be an effective way of assessing the robustness of machine models.
 However, these perturbations only indicate weaknesses in the model if they do not change the input so significantly that it legitimately result in changes in the expected output. While this is easy to control when the input is real-valued (images for example), the situation is more problematic on discrete data such as natural language.
 
-TEAPOT is an implementation of the evaluation framework described in the NAACL 2019 paper [On Evaluation of Adversarial Perturbations for Sequence-to-Sequence Models](link_to_paper) (**FIXME**: add link), wherein an adversarial attack is evaluated using two quantities:
+TEAPOT is an implementation of the evaluation framework described in the NAACL 2019 paper [On Evaluation of Adversarial Perturbations for Sequence-to-Sequence Models](https://arxiv.org/abs/1903.06620), wherein an adversarial attack is evaluated using two quantities:
 
 - `s_src(x, x')`: a measure of the semantic similarity between the original input `x` and its adversarial perturbation `x'`.
 - `d_tgt(y(x),y(x'),y*)`: a measure of how much the output similarity `s_tgt` (w.r.t. the reference `y*`) decreases when the model is ran on the adversarial input (giving output `y(x')`) instead of the original input (giving `y(x)`). Specifically `d_tgt(y(x),y(x'),y*)` is defined as `0` if `s_tgt(y,y*) < s_tgt(y',y*)` and `(s_tgt(y,y*) - s_tgt(y',y*)) / s_tgt(y,y*)` otherwise.
