@@ -110,11 +110,11 @@ def get_args():
             "(for source side evaluation) OR `--out` and `--adv-out` "
             " (for target side evaluation)."
         )
-    referenceless = False
-    if args.ref is None:
-        referenceless = True
+    with_references = False
+    if args.ref is not None:
+        with_references = True
     # Check file existence
-    if referenceless:
+    if with_references:
         file_check_list = ["src", "adv_src", "out", "adv_out"]
     else:
         file_check_list = ["src", "adv_src", "ref", "out", "adv_out"]
@@ -140,15 +140,15 @@ def get_args():
     scorer_tgt_class.add_args(parser)
     # Parse again with scorer specific args
     args = parser.parse_args()
-    return args, source_side, target_side, referenceless
+    return args, source_side, target_side, with_references
 
 
 def main():
     # Command line args
-    args, source_side, target_side, referenceless = get_args()
+    args, source_side, target_side, with_references = get_args()
     scale = args.scale
-    if referenceless:
-        print("No reference file provided. We will use the reference-less criterion.")
+    if not with_references:
+        print("Note: No reference file provided. Will use the reference-less criterion.")
     # Scorer
     scorer_src, scorer_tgt = scorers.scorers_from_args(args)
     # Source side eval
@@ -173,7 +173,7 @@ def main():
             print(f"5%-95%:\t{s_src_5*scale:.3f}-{s_src_95*scale:.3f}")
 
     # Target side eval with references
-    if target_side and not referenceless:
+    if target_side and with_references:
         # target relative decrease in score (d_tgt in the paper)
         d_tgt = scorer_tgt.rd_score(
             utils.loadtxt(args.adv_out),
@@ -204,8 +204,8 @@ def main():
             print(f"Mean:\t{d_tgt_avg*scale:.3f}")
             print(f"Std:\t{d_tgt_std*scale:.3f}")
             print(f"5%-95%:\t{d_tgt_5*scale:.3f}-{d_tgt_95*scale:.3f}")
-    # Both sided (success)
-    if target_side and source_side and not referenceless:
+    # Both sided (success) with references
+    if target_side and source_side and with_references:
         success = [
             float(s + d > args.success_threshold)
             for s, d in zip(s_src, d_tgt)
@@ -218,8 +218,8 @@ def main():
             print("-" * 80)
             print(f"Success percentage: {success_fraction*100:.2f} %")
 
-    # Target side eval with references
-    if target_side and referenceless:
+    # Target side eval without references
+    if target_side and not with_references:
         # target relative decrease in score (d_tgt in the paper)
         d_tgt = scorer_tgt.score(
             utils.loadtxt(args.adv_out),
@@ -248,8 +248,9 @@ def main():
             print(f"Mean:\t{d_tgt_avg*scale:.3f}")
             print(f"Std:\t{d_tgt_std*scale:.3f}")
             print(f"5%-95%:\t{d_tgt_5*scale:.3f}-{d_tgt_95*scale:.3f}")
-    # Both sided (success) and reference_less
-    if target_side and source_side and referenceless:
+    
+    # Both sided (success) and without references
+    if target_side and source_side and not with_references:
         success = [
             float(s/d > args.success_threshold)
             for s, d in zip(s_src, d_tgt)
