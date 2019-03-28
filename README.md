@@ -160,6 +160,7 @@ becomes
 ```s_src(x,x') + 1 - s_tgt(y(x),y(x')) > 1```
 which is equivalent to
 ```s_src(x,x') / s_tgt(y(x),y(x')) > 1.```
+The intuition here is slightly different: now, a *successful* attack has caused the system to magnify the source-side adversarial noise.
 
 Simply run the same commands without providing a reference file, for reference-less evaluation.
 For example:
