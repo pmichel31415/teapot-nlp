@@ -16,6 +16,8 @@ An attack is declared **successful** on `x,y` when `s_src(x,x') + d_tgt(y(x),y(x
 
 With TEAPOT, you can compute `s_src`, `d_tgt` and the success rate of an attack easily using proxy metrics for the source and target similarity (`chrF` by default).
 
+
+
 ## Getting started
 
 ### Installation and Requirements
@@ -142,6 +144,46 @@ s_src = chrf_scorer.score(adv_inputs, original_inputs)
 # Compute d_tgt
 # This will return a list of relative difference in scores (clamped to positive values)
 d_tgt = chrf_scorer.rd_score(adv_outputs, original_outputs, reference_outputs)
+```
+
+## Reference-less evaluation
+
+In the case where no target reference `y*` is available, one can treat as one the output `y(x)=y*`.
+We can then use:
+
+- `s_src(x, x')`: a measure of the semantic similarity between the original input `x` and its adversarial perturbation `x'`.
+- `s_tgt(y(x), y(x'))`: a measure of the semantic similarity between the respective outputs.
+
+Setting `y* := y(x)` (we are interested in how well the model deviates from its own predictions), the original criterion for success:
+```s_src(x,x') + d_tgt(y(x),y(x'),y*) > 1```
+becomes
+```s_src(x,x') + 1 - s_tgt(y(x),y(x')) > 1```
+which is equivalent to
+```s_src(x,x') / s_tgt(y(x),y(x')) > 1.```
+
+Simply run the same commands without providing a reference file, for reference-less evaluation.
+For example:
+
+```
+teapot --src examples/MT/src.fr \
+      --adv-src examples/MT/adv.charswap.fr \
+      --out examples/MT/base.en \
+      --adv-out examples/MT/adv.charswap.en
+```
+will print
+```
+No reference file provided. We will use the reference-less criterion.
+Source side preservation (ChrF):
+Mean: 86.908
+Std:  11.622
+5%-95%: 64.109-97.683
+--------------------------------------------------------------------------------
+Target side preservation (ChrF):
+Mean: 62.733
+Std:  21.529
+5%-95%: 16.650-90.555
+--------------------------------------------------------------------------------
+Success percentage: 97.60 %
 ```
 
 ## License

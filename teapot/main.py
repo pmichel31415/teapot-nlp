@@ -79,7 +79,9 @@ def get_args():
         help="Threshold that the value of s_src + d_tgt must surpass to "
         "consider the attack successful. When s_src and s_tgt are the same "
         "this should be 1, however in other cases a higher value might be "
-        "preferable (eg. when s_tgt is more 'optimistic' than s_src)",
+        "preferable (eg. when s_tgt is more 'optimistic' than s_src)."
+        "For evaluation without references, this is the value that s_src/d_tgt"
+        "must surpass to consider the attack successful.",
     )
     parser.add_argument(
         "--terse",
@@ -99,18 +101,24 @@ def get_args():
     # Check arguments
     source_side = args.src is not None and args.adv_src is not None
     target_side = (
-        args.ref is not None and
         args.out is not None and
         args.adv_out is not None
     )
     if not (source_side or target_side):
         raise ValueError(
-            "You need to specify at lease `--src` and `--adv-src` "
-            "(for source side evaluation) OR `--ref`, `--out` and `--adv-out`"
-            " (for target side evaluation)"
+            "You need to specify at least `--src` and `--adv-src` "
+            "(for source side evaluation) OR `--out` and `--adv-out` "
+            " (for target side evaluation)."
         )
+    referenceless = False
+    if args.ref is None:
+        referenceless = True
     # Check file existence
-    for name in ["src", "adv_src", "ref", "out", "adv_out"]:
+    if referenceless:
+        file_check_list = ["src", "adv_src", "out", "adv_out"]
+    else:
+        file_check_list = ["src", "adv_src", "ref", "out", "adv_out"]
+    for name in file_check_list:
         filename = getattr(args, name, None)
         if filename is not None and not os.path.isfile(filename):
             raise ValueError(
@@ -132,13 +140,15 @@ def get_args():
     scorer_tgt_class.add_args(parser)
     # Parse again with scorer specific args
     args = parser.parse_args()
-    return args, source_side, target_side
+    return args, source_side, target_side, referenceless
 
 
 def main():
     # Command line args
-    args, source_side, target_side = get_args()
+    args, source_side, target_side, referenceless = get_args()
     scale = args.scale
+    if referenceless:
+        print("No reference file provided. We will use the reference-less criterion.")
     # Scorer
     scorer_src, scorer_tgt = scorers.scorers_from_args(args)
     # Source side eval
@@ -162,8 +172,8 @@ def main():
             print(f"Std:\t{s_src_std*scale:.3f}")
             print(f"5%-95%:\t{s_src_5*scale:.3f}-{s_src_95*scale:.3f}")
 
-    # Target side eval
-    if target_side:
+    # Target side eval with references
+    if target_side and not referenceless:
         # target relative decrease in score (d_tgt in the paper)
         d_tgt = scorer_tgt.rd_score(
             utils.loadtxt(args.adv_out),
@@ -195,7 +205,7 @@ def main():
             print(f"Std:\t{d_tgt_std*scale:.3f}")
             print(f"5%-95%:\t{d_tgt_5*scale:.3f}-{d_tgt_95*scale:.3f}")
     # Both sided (success)
-    if target_side and source_side:
+    if target_side and source_side and not referenceless:
         success = [
             float(s + d > args.success_threshold)
             for s, d in zip(s_src, d_tgt)
@@ -208,6 +218,49 @@ def main():
             print("-" * 80)
             print(f"Success percentage: {success_fraction*100:.2f} %")
 
+    # Target side eval with references
+    if target_side and referenceless:
+        # target relative decrease in score (d_tgt in the paper)
+        d_tgt = scorer_tgt.score(
+            utils.loadtxt(args.adv_out),
+            utils.loadtxt(args.out),
+            lang=args.tgt_lang,
+        )
+        # Check size
+        if N is None:
+            N = len(d_tgt)
+        elif len(d_tgt) != N:
+            raise ValueError(
+                f"The number of samples in the source ({N}) doesn't match "
+                f"the number of samples in the target ({len(d_tgt)})"
+            )
+        # Statistics
+        d_tgt_avg, d_tgt_std, d_tgt_5, d_tgt_95 = utils.stats(d_tgt)
+        # Print stats
+        if args.terse:
+            print(f"{d_tgt_avg*scale:.3f}")
+        else:
+            if source_side:
+                print("-" * 80)
+            print(
+                f"Target side preservation ({scorer_tgt.name}):"
+            )
+            print(f"Mean:\t{d_tgt_avg*scale:.3f}")
+            print(f"Std:\t{d_tgt_std*scale:.3f}")
+            print(f"5%-95%:\t{d_tgt_5*scale:.3f}-{d_tgt_95*scale:.3f}")
+    # Both sided (success) and reference_less
+    if target_side and source_side and referenceless:
+        success = [
+            float(s/d > args.success_threshold)
+            for s, d in zip(s_src, d_tgt)
+        ]
+        success_fraction = sum(success) / N
+        # Print success
+        if args.terse:
+            print(f"{success_fraction*100:.3f}")
+        else:
+            print("-" * 80)
+            print(f"Success percentage: {success_fraction*100:.2f} %")
 
 if __name__ == "__main__":
     main()
