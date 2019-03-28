@@ -87,7 +87,7 @@ class ZeroOne(Scorer):
 class BLEU(Scorer):
 
     def score_sentence(self, hyp, ref, lang=None):
-        return sacrebleu.sentence_bleu(hyp, ref) / 100
+        return sacrebleu.sentence_bleu(hyp, ref, smooth_value=0.01) / 100
 
 
 @register_scorer("chrf", "ChrF")
