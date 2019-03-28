@@ -56,7 +56,7 @@ setup(
         ],
     },
     install_requires=[
-        "sacrebleu",
+        "sacrebleu>=1.3.1",
     ],
     include_package_data=True,
 )
