@@ -5,7 +5,7 @@ from teapot import utils
 
 
 def get_args():
-    parser = argparse.ArgumentParser("")
+    parser = argparse.ArgumentParser("TEAPOT", conflict_handler="resolve")
     parser.add_argument(
         "--s-src",
         default="chrf",
@@ -148,7 +148,10 @@ def main():
     args, source_side, target_side, with_references = get_args()
     scale = args.scale
     if not with_references:
-        print("Note: No reference file provided. Will use the reference-less criterion.")
+        print(
+            "Note: No reference file provided. Will use the "
+            "reference-less criterion."
+        )
     # Scorer
     scorer_src, scorer_tgt = scorers.scorers_from_args(args)
     # Source side eval
@@ -248,7 +251,7 @@ def main():
             print(f"Mean:\t{d_tgt_avg*scale:.3f}")
             print(f"Std:\t{d_tgt_std*scale:.3f}")
             print(f"5%-95%:\t{d_tgt_5*scale:.3f}-{d_tgt_95*scale:.3f}")
-    
+
     # Both sided (success) and without references
     if target_side and source_side and not with_references:
         success = [
@@ -262,6 +265,7 @@ def main():
         else:
             print("-" * 80)
             print(f"Success percentage: {success_fraction*100:.2f} %")
+
 
 if __name__ == "__main__":
     main()

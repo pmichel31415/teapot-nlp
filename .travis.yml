@@ -10,6 +10,8 @@ script:
 - tar xvzf meteor-1.5.tar.gz
 - pytest
 - teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en
+- teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en 
+  --s-src meteor --s-tgt meteor --meteor-jar meteor-1.5/meteor-1.5.jar
 - teapot --src examples/sentiment/src.txt --adv-src examples/sentiment/adv_src.txt --out examples/sentiment/out.txt --adv-out examples/sentiment/adv_out.txt --ref
   examples/sentiment/ref.txt --s-tgt zero_one --success-threshold 1.8
 - teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en --custom-scores-source
