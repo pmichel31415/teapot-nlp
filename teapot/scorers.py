@@ -94,7 +94,7 @@ class BLEU(Scorer):
 class ChrF(Scorer):
 
     def score_sentence(self, hyp, ref, lang=None):
-        return sacrebleu.sentence_chrf(hyp, ref).score
+        return sacrebleu.sentence_chrf(hyp, [ref]).score / 100
 
 
 @register_scorer("meteor", "METEOR")
