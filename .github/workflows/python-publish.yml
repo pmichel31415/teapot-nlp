@@ -1,0 +1,44 @@
+# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Upload Python Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build
+    - name: Build package
+      run: python -m build
+    - name: Run tests with unittest
+      run: wget http://www.cs.cmu.edu/\~alavie/METEOR/download/meteor-1.5.tar.gz
+      run: tar xvzf meteor-1.5.tar.gz
+      run: pytest
+      run: teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en
+      run: teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en --s-src meteor --s-tgt meteor --meteor-jar meteor-1.5/meteor-1.5.jar  --src-lang fr --tgt-lang en
+      run: teapot --src examples/sentiment/src.txt --adv-src examples/sentiment/adv_src.txt --out examples/sentiment/out.txt --adv-out examples/sentiment/adv_out.txt --ref examples/sentiment/ref.txt --s-tgt zero_one --success-threshold 1.8
+      run: teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en --custom-scores-source examples/custom_scorers.py --s-tgt f1
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
