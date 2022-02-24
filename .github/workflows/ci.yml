@@ -27,6 +27,8 @@ jobs:
         pip install .
     - name: Run tests with unittest
       run: |
+        wget http://www.cs.cmu.edu/\~alavie/METEOR/download/meteor-1.5.tar.gz
+        tar xvzf meteor-1.5.tar.gz
         python -m pytest
         teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en
         teapot --src examples/MT/src.fr --adv-src examples/MT/adv.charswap.fr --out examples/MT/base.en --adv-out examples/MT/adv.charswap.en --ref examples/MT/ref.en --s-src meteor --s-tgt meteor --meteor-jar meteor-1.5/meteor-1.5.jar  --src-lang fr --tgt-lang en
