@@ -1,6 +1,6 @@
 <img align="left" height="64" src="teapot.gif" alt="teapot"/>
 
-# TEAPOT [![Build Status](https://travis-ci.org/pmichel31415/teapot-nlp.svg?branch=master)](https://travis-ci.org/pmichel31415/teapot-nlp)
+# TEAPOT ![Build Status](https://github.com/pmichel31415/teapot-nlp/actions/workflows/ci.yml/badge.svg)
 
 TEAPOT (**T**ool for **E**valuating **A**dversarial **P**erturbations **O**n **T**ext) is a toolkit to evaluate the effectiveness of adversarial perturbations on NLP systems by taking into account the preservation of meaning in the source.
 
